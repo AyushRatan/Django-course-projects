@@ -1,0 +1,178 @@
+Django command line codes :
+
+- to check version of Django installed : >>python -m django --version
+- >>django-admin
+
+1) After installing Django / Django present in the system
+
+	- to start project : >>django-admin startproject "project_name"
+	- to runserver :	>>python manage.py runserver
+
+
+
+
+
+-----------------------------------------Django Apps----------------------------------------------------
+
+-Every Website can have different sections such as blog,comments,reviews etc, each of these sections are called apps in Django
+
+-Every app in Django will have its own files eg-  views, appdata etc
+
+	-> Views :  They process user request and send an appropriate response
+			-generally written as function can be written inside views.py file
+	->
+
+- Creating an app :	>>python manage.py startapp "appname"
+
+- After creating an app, all files needed for an app will be automatically created, now we can define functions in views.py as response to request
+
+
+--------------------------------------How URL Works-----------------------------------------------
+
+-When request is submitted ---------> Django looks for ROOT_URLCONF in setting.py -----------------> Which then points to somefile.urls
+	----------->In urls.py---------->the pattern for request is matched
+
+
+
+--------------------------------------Admin page access steps-------------------------------------------
+
+- (in anaconda cmd) : >>python manage.py makemigrations (prepares django for migrate, something like commit)
+			    
+				>>python manage.py migrate
+				>>python manage.py createsuperuser
+
+				-Enter the username and password
+				-After this u can enter the admin page using username and password
+
+
+--------------------------------------------Models----------------------------------------------------
+
+-Allows us to create database tables using python classes
+
+- these classes inherit from models.Model
+	-> models have different datatypes i.e. models.Charfield(),models.Integerfield() etc...
+
+- After having defined the table blueprint in models.py of your app, you need to register it in settings.py under Installed_APPS variable
+  as - "appname.apps.name_of_the_class
+
+- Also after having defined the database, we should make sure django knows about it. To do so >> python manage.py makemigrations (appname)
+  where you have made changes
+
+- We actually look at the code which will create the table run >>python manage.py sqlmigrate (appname) (migration number)
+
+- Django provide database abstraction API which allows for object creation, updation and deletion. In order to do all this we first need to create an
+  object, and to do so we need to create an object of class (databasename) and then save it using save() method 
+
+-In django we retrieve data from a dataset using queryset<>, a query set requires a model,manager,method eg: Item.objects.all() -> here Item(Model), Objects(Default manager), all()(method)
+
+
+-----------------------------------------Templates in Django---------------------------------------------
+
+- Templates allow us to dynamically create html page combied with database entries. Templates combine the static part(html) with dynamic part(data from database) to give us the webpage
+
+- To create a template, first create a folder name "templates" then create a folder within it with (appname) then inside it create html file.
+
+- To make django aware from where we are loading this template import >>from django.template import loader in views.py
+
+- now simply load the template into a variable ie >>template = loader.get_template("appname/file.html")
+
+- Template always needs a context (information from the database) templates combines the html with the context and then displays the result.
+
+- Django template syntax: template engine - jinja2 ,Djangi template language
+
+	->	{% for item in item_list or any flow control statement %}
+			{{ variable }} --- {{variable}}
+		
+		{% endfor or endif %}
+
+- two format for returning httprequest : 1) return HttpRequest(template.render(context,request))
+						     2) return render(request,"http_path",context)
+
+-	>>To create detail page, create a view function(request,item_id), use Item.objects.get(pk=item_id) -> to get the item from database, now create a context and return a render.
+	>>Now in (app) urls.py create a path("<int:item_id>/",views.detail,name="detail")
+	>>Now in index(homepage).html , create anchor tag and in href="/food/{{ item.id }}"
+
+- We can remove hardcoded urls by using the 'name' parameter in the urlpatterns , so in the <a> tags href = "{{ url 'name' attribute }}" eg: "{{ url 'detail' item.id }}"
+
+- We need to namespace our urls to avoid clashing with urls of other apps with same name eg, so first go to urls.py and define app_name = (appname)
+  then in the anchor tags mention href = "{{ url 'food:detail' item.id }}" 
+
+
+---------------------------------------------STATIC FILES------------------------------------------------
+
+- make static file under app eg: /static/(appname)/.css,javascript,images files etc....
+
+-load the static css into html file using {% load static %}
+
+- To avoid repetiton of code, we can make a base.html load the static files on it and then extend this file to other html files and make our page
+  specific designs within the {% block content %}{% endblock %}
+
+
+-------------------------------------------FORMS----------------------------------------------------------
+
+-
+
+------------------------------------DataBase And Migrations----------------------------------------------
+
+1) Django has ORM (Object Relational Mapper) allows us to access the database in an easy to use object orient way
+2) Use different databases without changing the code
+3) In django we can represent our databse structures as classes (called models)
+	
+	-class Post(models.Model):
+
+    		title = models.CharField(max_length=100)
+    		content = models.TextField()
+    		date_posted = models.DateTimeField(default=timezone.now)
+    		author = models.ForeignKey(User,on_delete=models.CASCADE)
+
+4) To makechanges to the database run 
+	->>python manage.py makemigrations
+
+5) To view the exact SQL running in the background
+
+	- >>python manage.py sqlmigrate "project_name" migration_number
+		- eg:	>>python manage.py sqlmigrate blog 0001
+
+
+
+---------------------------------To start Django Shell and Interact with database Objects------------------
+1)
+	>>python manage.py shell
+	>>from bolg.models import Post
+	>>from django.contrib.auth.models import User
+
+
+2) To view all user objects
+
+	>>User.objects.all() -> gives a queryset of all users
+	>>User.objects.first() -> gives first user
+	>>User.objects.last() -> gives last user
+
+3) To filter objects
+
+	>>user.objects.filter(username=="ayush")
+	>> "		"	"		"	".first()
+
+
+4) Assign user object to a variable and then can access their attributes
+
+5) Can also select objects in the following manner : >>User.objects.get(id=1) -> the id of the first user
+
+
+6) To create an object : >> obj_name = Post(title='blog_1',content='First post content',author=user/author_id = user_id)
+				 
+				 >> obj_name.save() -> !!DONT FORGET TO SAVE
+
+	NOTE : 1) accessing the foreign key attribute of an object returns object of parent, and we can access the parent attributes using '.' notation
+
+			
+				>>eg : post.author.email -> ayushratan.974@gmail.com
+
+		 2) To access the derived element of user object use post_set :
+			
+				>>eg : user.post_set.all() -> returns query set of all posts pertaining to this user
+				>>     user.post_set.create(title="Blog 3", content="Post 3 Content") -> No need to author, since django knows its user.
+				
+
+		 3) If we look up admin page after having created posts we will not find it until we register it.
+
