@@ -173,6 +173,11 @@ Django command line codes :
 				>>eg : user.post_set.all() -> returns query set of all posts pertaining to this user
 				>>     user.post_set.create(title="Blog 3", content="Post 3 Content") -> No need to author, since django knows its user.
 				
-
 		 3) If we look up admin page after having created posts we will not find it until we register it.
+
+
+
+-----------------------------------------------USER AUTHENTICATION---------------------------------------------------
+
+- To check if a user is logged in use {% if user.is_authenticated %}{% else %}{% endif %}
 
